@@ -1,6 +1,7 @@
 name: churn-imbalanced-dataset
 on: [push]
 permissions: write-all
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -21,11 +22,22 @@ jobs:
           pip install -r requirements.txt
           python script.py
 
+      - name: Train model & produce artifacts
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python script.py
+
+          # Vérifier la présence des artefacts
+          test -f metrics.txt || (echo "❌ metrics.txt manquant !" && exit 1)
+          test -f conf_matrix.png || (echo "❌ conf_matrix.png manquant !" && exit 1)
+
+          echo "✅ Artefacts générés : metrics.txt et conf_matrix.png"
+
       - name: Generate Report
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-
           # Get the report
           echo "## Metrics" > report.md
           cat metrics.txt >> report.md
